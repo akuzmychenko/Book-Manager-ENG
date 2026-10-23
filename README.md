@@ -49,7 +49,6 @@ Install a Java Development Kit (JDK). The source uses Java 8 language features, 
 From the repository's root directory, run:
 
 ```sh
-cd BookManager
 javac -encoding UTF-8 -d out src/*.java
 java -cp out Main
 ```

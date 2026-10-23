@@ -4,6 +4,23 @@ import java.util.*;
 /**PROJECT: SIMPLE BOOK MANAGEMENT SYSTEM*/
 
 public class Main {
+    // Compare final values and row order, not object identities or action counts.
+    private static boolean hasChanges(List<Book> originalBooks, List<Book> books) {
+        if (originalBooks.size() != books.size()) {
+            return true;
+        }
+        for (int i = 0; i < books.size(); i++) {
+            Book original = originalBooks.get(i);
+            Book current = books.get(i);
+            if (!Objects.equals(original.title, current.title)
+                    || !Objects.equals(original.author, current.author)
+                    || original.year != current.year) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static void main(String[] args) {
         long startTime = System.currentTimeMillis();
         Scanner scanner = new Scanner(System.in);
@@ -22,16 +39,27 @@ public class Main {
             }
         }
 
+        // Keep a deep copy: editing a book changes its existing object.
+        List<Book> originalBooks = new ArrayList<>();
+        for (Book book : books) {
+            originalBooks.add(new Book(book.title, book.author, book.year));
+        }
+
         boolean running = true;
         int addCount = 0, searchCount = 0;
         while (running) {
             MenuManagement.displayMenu();
             String option = scanner.nextLine();
             switch (option) {
-                case "1":
+                case "1": {
+                    // Count only successful additions, not rejected attempts.
+                    int countBefore = books.size();
                     MenuManagement.addBook(books, scanner);
-                    addCount++;
+                    if (books.size() > countBefore) {
+                        addCount++;
+                    }
                     break;
+                }
 
                 case "2":
                     MenuManagement.printBooks(books);
@@ -59,7 +87,11 @@ public class Main {
                     break;
 
                 case "8":
-                    MenuManagement.saveBooks("updated_books.csv", books);
+                    if (hasChanges(originalBooks, books)) {
+                        MenuManagement.saveBooks("updated_books.csv", books);
+                    } else {
+                        System.out.println("No changes detected. updated_books.csv was not created or overwritten.");
+                    }
                     running = false;
                     break;
 
